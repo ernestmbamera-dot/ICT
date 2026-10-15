@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Computer Systems Quiz — CAP31101 · LUANAR Bunda</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0f13;
+  --surface: #16181f;
+  --surface2: #1e2029;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #f0f0f0;
+  --muted: #8a8fa8;
+  --accent: #2ecc7e;
+  --accent2: #1abc9c;
+  --green: #2ecc7e;
+  --red: #ff5c6a;
+  --amber: #ffbb3d;
+  --pill-bg: rgba(46,204,126,0.12);
+  --pill-border: rgba(46,204,126,0.3);
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.65; min-height: 100vh; }
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: linear-gradient(rgba(46,204,126,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(46,204,126,0.03) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none; z-index: 0;
+}
+.wrap { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 0 20px 80px; }
+.screen { display: none; animation: fadeUp 0.4s ease; }
+.screen.active { display: block; }
+@keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+.nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 15px; letter-spacing: 0.05em; color: var(--accent); }
+.nav-logo span { color: var(--muted); font-weight: 400; }
+.nav-links { display: flex; gap: 6px; }
+.nav-btn { background: transparent; border: 1px solid var(--border2); color: var(--muted); padding: 6px 14px; border-radius: 40px; font-size: 12px; font-family: var(--font-body); cursor: pointer; transition: all 0.2s; }
+.nav-btn:hover, .nav-btn.active { border-color: var(--accent); color: var(--accent); background: var(--pill-bg); }
+.hero { padding: 60px 0 40px; }
+.hero-tag { display: inline-flex; align-items: center; gap: 8px; background: var(--pill-bg); border: 1px solid var(--pill-border); color: var(--accent); font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 14px; border-radius: 40px; margin-bottom: 28px; }
+.hero-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+h1 { font-family: var(--font-display); font-size: clamp(34px, 6vw, 54px); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 18px; }
+h1 em { font-style: normal; color: var(--accent); }
+.hero-sub { font-size: 15px; color: var(--muted); max-width: 480px; margin-bottom: 36px; line-height: 1.7; }
+.hero-stats { display: flex; gap: 28px; margin-bottom: 40px; }
+.stat-n { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--text); }
+.stat-l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.register-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; padding: 32px; margin-bottom: 40px; }
+.register-card h2 { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.register-card p { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-row.full { grid-template-columns: 1fr; }
+label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; }
+input, select { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-family: var(--font-body); font-size: 14px; padding: 10px 14px; outline: none; transition: border-color 0.2s; }
+input:focus, select:focus { border-color: var(--accent); }
+input::placeholder { color: var(--muted); }
+select option { background: var(--surface2); }
+.topic-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.topic-toggle { background: var(--surface2); border: 1px solid var(--border2); color: var(--muted); padding: 6px 14px; border-radius: 40px; font-size: 12px; cursor: pointer; font-family: var(--font-body); transition: all 0.2s; }
+.topic-toggle.on { background: var(--pill-bg); border-color: var(--pill-border); color: var(--accent); }
+.btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-body); font-size: 14px; font-weight: 500; padding: 11px 22px; border-radius: 40px; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: var(--accent); color: #0e0f13; font-weight: 700; }
+.btn-primary:hover { background: #3de88f; transform: translateY(-1px); }
+.btn-ghost { background: transparent; border: 1px solid var(--border2); color: var(--muted); }
+.btn-ghost:hover { color: var(--text); background: var(--surface2); }
+.btn-sm { padding: 7px 16px; font-size: 13px; }
+.progress-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.progress-label { font-size: 12px; color: var(--muted); }
+.progress-score { font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--accent); }
+.progress-track { height: 3px; background: var(--surface2); border-radius: 3px; margin-bottom: 28px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+.q-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; padding: 28px 28px 20px; margin-bottom: 16px; }
+.q-section-tag { display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); background: var(--pill-bg); border: 1px solid var(--pill-border); padding: 3px 10px; border-radius: 40px; margin-bottom: 14px; }
+.q-text { font-family: var(--font-display); font-size: 18px; font-weight: 600; line-height: 1.4; color: var(--text); margin-bottom: 22px; }
+.options { display: grid; gap: 9px; }
+.opt-btn { display: flex; align-items: flex-start; gap: 12px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; padding: 13px 16px; text-align: left; cursor: pointer; width: 100%; font-family: var(--font-body); font-size: 14px; color: var(--text); transition: all 0.2s; line-height: 1.5; }
+.opt-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(46,204,126,0.06); }
+.opt-btn:disabled { cursor: default; }
+.opt-letter { min-width: 24px; height: 24px; border-radius: 6px; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--muted); font-family: var(--font-display); flex-shrink: 0; margin-top: 1px; }
+.opt-btn.correct { border-color: var(--green); background: rgba(46,204,126,0.08); }
+.opt-btn.correct .opt-letter { background: var(--green); color: #0e0f13; }
+.opt-btn.wrong { border-color: var(--red); background: rgba(255,92,106,0.08); }
+.opt-btn.wrong .opt-letter { background: var(--red); color: #fff; }
+.feedback-box { border-radius: 10px; padding: 14px 16px; font-size: 13px; line-height: 1.65; margin-bottom: 14px; display: none; }
+.feedback-box.correct { background: rgba(46,204,126,0.1); border: 1px solid rgba(46,204,126,0.3); color: #7ef0b0; }
+.feedback-box.wrong { background: rgba(255,92,106,0.1); border: 1px solid rgba(255,92,106,0.3); color: #ffa0a8; }
+.feedback-box strong { display: block; margin-bottom: 4px; font-family: var(--font-display); font-size: 13px; }
+.discussion-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px; display: none; }
+.discussion-section h4 { font-family: var(--font-display); font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+.comments-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; max-height: 260px; overflow-y: auto; }
+.comment { background: var(--surface2); border-radius: 8px; padding: 10px 12px; font-size: 13px; }
+.comment-author { font-weight: 500; color: var(--accent); font-size: 12px; margin-bottom: 3px; }
+.comment-text { color: var(--text); line-height: 1.5; }
+.comment-time { font-size: 10px; color: var(--muted); margin-top: 4px; }
+.comment-input-row { display: flex; gap: 8px; }
+.comment-input-row input { flex: 1; }
+.no-comments { font-size: 12px; color: var(--muted); font-style: italic; }
+.quiz-nav { display: flex; align-items: center; justify-content: space-between; }
+.result-hero { text-align: center; padding: 60px 0 40px; }
+.result-ring { width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(var(--accent) var(--pct, 0%), var(--surface2) 0%); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 0 40px rgba(46,204,126,0.2); }
+.result-ring-inner { width: 108px; height: 108px; border-radius: 50%; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.result-pct { font-family: var(--font-display); font-size: 32px; font-weight: 800; }
+.result-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.result-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+.result-sub { color: var(--muted); max-width: 420px; margin: 0 auto 32px; font-size: 14px; line-height: 1.65; }
+.result-breakdown { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 36px; }
+.breakdown-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 18px; text-align: center; }
+.breakdown-n { font-family: var(--font-display); font-size: 28px; font-weight: 700; }
+.breakdown-n.green { color: var(--green); }
+.breakdown-n.red { color: var(--red); }
+.breakdown-n.amber { color: var(--amber); }
+.breakdown-l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 4px; }
+.lb-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 16px; overflow: hidden; margin-bottom: 24px; }
+.lb-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.lb-header h3 { font-family: var(--font-display); font-size: 17px; font-weight: 700; }
+.lb-row { display: flex; align-items: center; gap: 16px; padding: 14px 24px; border-bottom: 1px solid var(--border); transition: background 0.15s; }
+.lb-row:last-child { border-bottom: none; }
+.lb-row:hover { background: var(--surface2); }
+.lb-rank { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--muted); width: 24px; text-align: center; flex-shrink: 0; }
+.lb-rank.gold { color: #ffd700; } .lb-rank.silver { color: #c0c0c0; } .lb-rank.bronze { color: #cd7f32; }
+.lb-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.lb-info { flex: 1; }
+.lb-name { font-size: 14px; font-weight: 500; }
+.lb-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.lb-score-wrap { text-align: right; }
+.lb-score { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--accent); }
+.lb-pct { font-size: 11px; color: var(--muted); }
+.lb-empty { padding: 36px 24px; text-align: center; color: var(--muted); font-size: 13px; }
+.badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 40px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.badge-you { background: rgba(46,204,126,0.15); color: var(--accent); border: 1px solid var(--pill-border); }
+.text-muted { color: var(--muted); } .text-center { text-align: center; } .flex-gap { display: flex; gap: 10px; flex-wrap: wrap; }
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+@media(max-width: 560px) { .form-row { grid-template-columns: 1fr; } .result-breakdown { grid-template-columns: 1fr 1fr; } h1 { font-size: 30px; } .q-text { font-size: 16px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <div class="nav-logo">CAP31101<span>/computer-systems</span></div>
+    <div class="nav-links">
+      <button class="nav-btn active" onclick="showScreen('home')">Quiz</button>
+      <button class="nav-btn" onclick="showScreen('leaderboard')">Leaderboard</button>
+    </div>
+  </nav>
+
+  <!-- HOME -->
+  <div id="screen-home" class="screen active">
+    <div class="hero">
+      <div class="hero-tag">CAP31101 · ONE % STUDY HUB · LUANAR</div>
+      <h1>ICT, Data &amp;<br><em>Information</em></h1>
+      <p class="hero-sub">60 questions built from your Lecture 1 slides: ICT, data vs information, the processing cycle, storage units, computer components and classification. Compete, discuss, and track your rank.</p>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-n">60</div><div class="stat-l">Questions</div></div>
+        <div class="stat"><div class="stat-n">10</div><div class="stat-l">Topics</div></div>
+        <div class="stat"><div class="stat-n" id="stat-players">0</div><div class="stat-l">Attempts</div></div>
+      </div>
+    </div>
+    <div class="register-card">
+      <h2>Register to start</h2>
+      <p>Your name and score will appear on the ONE % Study Hub leaderboard.</p>
+      <div class="form-row">
+        <div><label for="inp-name">Full name</label><input type="text" id="inp-name" placeholder="e.g. Chisomo Phiri"></div>
+        <div><label for="inp-reg">Reg. number</label><input type="text" id="inp-reg" placeholder="e.g. 2501013**"></div>
+      </div>
+      <div class="form-row full">
+        <div>
+          <label>Filter topics (tap to deselect)</label>
+          <div class="topic-grid" id="topic-grid"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="startQuiz()" style="width:100%;justify-content:center;margin-top:4px">Start quiz →</button>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screen-quiz" class="screen">
+    <div style="padding-top: 24px;">
+      <div class="progress-header">
+        <span class="progress-label" id="prog-label">Question 1 of 60</span>
+        <span class="progress-score" id="prog-score">0 pts</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="q-card">
+        <div class="q-section-tag" id="q-section"></div>
+        <div class="q-text" id="q-text"></div>
+        <div class="options" id="options"></div>
+      </div>
+      <div class="feedback-box" id="feedback"></div>
+      <div class="discussion-section" id="discussion-section">
+        <h4>💬 Group discussion</h4>
+        <div class="comments-list" id="comments-list"></div>
+        <div class="comment-input-row">
+          <input type="text" id="comment-input" placeholder="Add your thought…" maxlength="200" onkeydown="if(event.key==='Enter')postComment()">
+          <button class="btn btn-ghost btn-sm" onclick="postComment()">Post</button>
+        </div>
+      </div>
+      <div class="quiz-nav">
+        <button class="btn btn-ghost" onclick="showScreen('home')">← Exit</button>
+        <button class="btn btn-primary" id="next-btn" onclick="nextQ()" style="display:none">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="screen-result" class="screen">
+    <div class="result-hero">
+      <div class="result-ring" id="result-ring">
+        <div class="result-ring-inner">
+          <div class="result-pct" id="result-pct">0%</div>
+          <div class="result-label">score</div>
+        </div>
+      </div>
+      <div class="result-title" id="result-title">Well done!</div>
+      <div class="result-sub" id="result-sub"></div>
+      <div class="result-breakdown">
+        <div class="breakdown-card"><div class="breakdown-n green" id="bd-correct">0</div><div class="breakdown-l">Correct</div></div>
+        <div class="breakdown-card"><div class="breakdown-n red" id="bd-wrong">0</div><div class="breakdown-l">Wrong</div></div>
+        <div class="breakdown-card"><div class="breakdown-n amber" id="bd-total">0</div><div class="breakdown-l">Total</div></div>
+      </div>
+      <div class="flex-gap" style="justify-content:center">
+        <button class="btn btn-ghost" onclick="restartQuiz()">Retry</button>
+        <button class="btn btn-primary" onclick="showScreen('leaderboard')">View leaderboard →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div id="screen-leaderboard" class="screen">
+    <div style="padding-top: 32px;">
+      <h2 style="font-family: var(--font-display); font-size: 26px; font-weight: 800; margin-bottom: 6px;">Leaderboard</h2>
+      <p class="text-muted" style="font-size: 13px; margin-bottom: 28px;">ONE % Study Hub — CAP31101 Computer Systems rankings.</p>
+      <div class="lb-card">
+        <div class="lb-header"><h3>Top scores</h3><span class="text-muted" style="font-size:12px" id="lb-count">0 attempts</span></div>
+        <div id="lb-rows"></div>
+      </div>
+      <div class="text-center"><button class="btn btn-ghost" onclick="showScreen('home')">Take the quiz →</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── QUESTION BANK — built from CAP31101 Lecture 1 slides ───
+// Format: correct answer is always stored separately, randomized at runtime
+const RAW=[];
+function Q(s,q,c,w,e){RAW.push({s,q,correct:c,wrong:w,exp:e});}
+/* ICT */
+Q("ICT: Old, New & Emerging","ICT is best defined as the technologies used to:","handle, process, store, transmit and present information",["design, assemble, repair and sell computer hardware parts","write, compile, test and publish programming code only","create, print, bind and distribute paper documents only"],"ICT covers all technologies used to handle, process, store, transmit and present information, integrating computing, telecommunications and media.");
+Q("ICT: Old, New & Emerging","Which technology is classed as an OLD ICT in the lecture?","Radio broadcasting",["Personal computers","Cell phones","Satellite communication"],"Old ICTs were established before the computer age: radio, television and the landline telephone.");
+Q("ICT: Old, New & Emerging","What mainly distinguishes NEW ICTs from OLD ICTs?","They are driven by computers and digital networks, enabling two-way communication",["They broadcast one-way signals only over copper wire networks","They rely on analogue radio waves to reach large audiences","They were built before computers and digital networks existed"],"New ICTs (PCs, the Internet, cell phones, satellites) enable two-way, global, instant and multimedia communication; old ICTs were largely one-way or point-to-point.");
+Q("ICT: Old, New & Emerging","Which of these is listed as an EMERGING ICT?","Internet of Things (IoT)",["Landline telephone","Television broadcasting","Desktop personal computer"],"Emerging ICTs include AI/ML, IoT, 5G/6G, edge computing, blockchain, AR/VR and robotics.");
+Q("ICT: Old, New & Emerging","In the lecture's analogy, ICT is the 'nervous system' of modern civilisation because it:","carries information between people, organisations and systems worldwide",["stores every important document safely in one central building","repairs damaged equipment automatically during the night time","controls how electricity is supplied to each home and office"],"Like a nervous system, ICT carries signals (information) quickly across the whole system.");
+/* Data vs Information */
+Q("Data vs Information","Which statement correctly describes DATA?","Raw, unprocessed facts and figures with no inherent meaning",["Processed facts that answer a specific question for a user","A summary report that has been prepared for managers to read","Knowledge that is ready to be used for decision making"],"Data are raw facts and figures; information is processed, contextualised data.");
+Q("Data vs Information","Which of the following is INFORMATION rather than data?","'75% of respondents felt food insecure'",["The number 38.5","A soil pH reading of 5.2","A list of 200 questionnaire responses"],"A percentage summarising responses has been processed and given meaning.");
+Q("Data vs Information","A clinic records the number 38.5. Adding the label '38.5°C, patient has a fever' makes it:","information, because it now has context and meaning",["data, because it is still a single number on a thermometer","a program, because it gives the computer an instruction","hardware, because it was measured by a physical device"],"Context turns data into information.");
+Q("Data vs Information","Data are described as the ____ of a process, while information is the ____.","input; output",["output; input","storage; feedback","hardware; software"],"Data go into the process; information comes out.");
+Q("Data vs Information","A researcher records 28, 31, 27, 33, 26 with no labels or units. These numbers are:","data, because they have no context yet",["information, because they are numeric","knowledge, because they were measured","output, because they were recorded"],"Without labels, units or context they are only data.");
+Q("Data vs Information","What is the mean soil moisture (%) for the five weeks 28, 31, 27, 33 and 26?","29",["28","30","31"],"(28+31+27+33+26)/5 = 145/5 = 29.");
+Q("Data vs Information","Which is NOT one of the qualities of good information listed in the lecture?","Anonymous",["Accurate","Verifiable","Timely"],"The listed qualities are accurate, complete, flexible, reliable, relevant, simple, timely, verifiable, accessible and secure.");
+Q("Data vs Information","A report is correct but arrives after the decision has already been made. Which quality of information is lacking?","Timely",["Accurate","Secure","Complete"],"Information must reach the user in time to be useful.");
+/* Processing Cycle */
+Q("Information Processing Cycle","How many stages are in the information processing cycle in the lecture?","Five",["Three","Four","Six"],"Input, Process, Output, Storage and Feedback.");
+Q("Information Processing Cycle","Which sequence lists the stages of the cycle in the correct order?","Input, Process, Output, Storage, Feedback",["Process, Input, Storage, Output, Feedback","Input, Storage, Process, Feedback, Output","Output, Input, Process, Feedback, Storage"],"Data enter, are processed, results are output and stored, then reviewed as feedback.");
+Q("Information Processing Cycle","A farmer's phone calculates the average maize height and growth rate. This is the ____ stage.","Process",["Input","Output","Storage"],"Calculations are carried out in the processing stage by the CPU.");
+Q("Information Processing Cycle","The app shows a chart saying the crop is 12% below expected growth. This is the ____ stage.","Output",["Input","Process","Feedback"],"Results displayed or printed as information are output.");
+Q("Information Processing Cycle","The farmer then changes the fertiliser applied after seeing the chart. This is:","Feedback",["Input","Storage","Process"],"Feedback is when output is reviewed, errors are corrected and the cycle repeats with adjustments.");
+Q("Information Processing Cycle","The saying 'Garbage In, Garbage Out' means that:","the quality of output depends on the quality of input",["the computer automatically deletes poor quality data before use","storage devices destroy any faulty data that they receive","every output is correct, whatever input is supplied to it"],"A computer processes whatever it is given, so poor input gives poor output.");
+Q("Information Processing Cycle","A maize plant is expected to be 50 cm tall. If it is 12% below this, its height is:","44 cm",["38 cm","46 cm","56 cm"],"50 × 0.88 = 44 cm.");
+/* Data types */
+Q("Types of Data","A hospital's admission times are an example of which data type?","Date/Time",["Boolean","Image","Audio"],"Planting dates, admission times and transaction timestamps are date/time data.");
+Q("Types of Data","Which data type has only two possible values, such as Yes/No or True/False?","Boolean",["Numeric","Text","Date/Time"],"Boolean data are binary coded, such as 0/1.");
+Q("Types of Data","Satellite imagery of farmland is classified as:","Image data",["Numeric data","Text data","Boolean data"],"Satellite imagery, field photographs and medical scans are image data.");
+Q("Types of Data","A recorded voice survey is which type of data?","Audio",["Text","Image","Boolean"],"Recorded interviews and voice surveys are audio data.");
+Q("Types of Data","Why must you recognise the type of data you are working with?","It is the first step in choosing the right tool",["It decides the size of the monitor that must be bought","It determines the speed of the internet connection used","It removes the need to store the data for later use"],"Each data type is stored and processed differently.");
+/* Units */
+Q("Data Storage Units","All digital data are ultimately stored as:","bits (0 or 1)",["bytes only","characters","pixels"],"A bit is a binary digit; larger units are made by grouping bits.");
+Q("Data Storage Units","How many bytes are in one kilobyte (KB) in the lecture's table?","1,024",["1,000","512","8,192"],"1 KB = 1,024 bytes.");
+Q("Data Storage Units","How many bits are in 5 bytes?","40",["13","45","50"],"5 × 8 = 40 bits.");
+Q("Data Storage Units","How many bytes are in 3 KB?","3,072",["3,000","2,048","24,576"],"3 × 1,024 = 3,072 bytes.");
+Q("Data Storage Units","How many MB are in 2 GB?","2,048",["2,000","1,024","4,096"],"2 × 1,024 = 2,048 MB.");
+Q("Data Storage Units","A phone stores 4 MB photographs. How many fit in 1 GB (1,024 MB)?","256",["250","512","128"],"1,024 / 4 = 256.");
+Q("Data Storage Units","A 500 GB drive is used to store 2 GB films. How many films can it hold?","250",["500","1,000","125"],"500 / 2 = 250.");
+Q("Data Storage Units","How many GB are in 1 TB according to the lecture?","1,024",["1,000","512","8"],"1 TB = 1,024 GB.");
+/* Computer basics */
+Q("What Is a Computer?","A computer is best described as an electronic device that:","receives input, processes it using a program, stores data and produces output",["only performs arithmetic calculations on numbers and nothing else","only stores files and documents for use at a later time","connects people through telephone and radio networks only"],"Receive, process, store, produce output.");
+Q("What Is a Computer?","What allows a computer to operate without human intervention for each step?","A stored program of instructions",["A larger monitor","A faster keyboard","A bigger hard drive"],"Once given a program, the computer follows it automatically.");
+Q("What Is a Computer?","Which is the correct list of the four core functions of every computer?","Input, Processing, Storage, Output",["Input, Processing, Printing, Feedback","Input, Storage, Output, Networking","Processing, Storage, Typing, Output"],"The four core functions are input, processing, storage and output.");
+Q("What Is a Computer?","In the four core functions, the CPU is mainly responsible for:","processing",["input","storage","output"],"The CPU executes program instructions on input data.");
+Q("What Is a Computer?","Which is TRUE about RAM?","It holds data temporarily and is cleared when power is off",["It keeps data permanently even after the power is switched off","It converts AC electricity from the wall into DC voltage","It displays images and video on the monitor screen"],"RAM is short-term working memory; HDDs, SSDs and cloud keep data permanently.");
+/* Hardware & Software */
+Q("Hardware & Software","Which is an example of SOFTWARE?","Microsoft Excel",["Motherboard","Keyboard","Power supply"],"Excel is a spreadsheet program; the others are hardware.");
+Q("Hardware & Software","Software is best described as:","sets of instructions that tell hardware what to do",["the physical parts that you can touch and see inside the case","the cooling fans and metal casing that hold the computer","the electricity that is supplied to the machine each day"],"Hardware is physical; software is instructions.");
+Q("Hardware & Software","Which of these is an operating system?","Linux",["MySQL","Microsoft Word","Firefox"],"Windows, macOS, Linux and Android are operating systems.");
+Q("Hardware & Software","Why is hardware without software described as 'expensive metal and plastic'?","It cannot do anything useful without instructions to run",["It cannot be switched on and connected to a power supply","It is always too costly to repair when it breaks down","It cannot be placed on a desk or inside a case"],"Hardware and software together create a functional computer system.");
+/* I/O devices */
+Q("Input & Output Devices","An input device is any hardware component that:","allows you to enter data and instructions into a computer",["conveys information to one or more people who are present","permanently stores the operating system and user files","supplies power to the motherboard and other components"],"Input devices enter data; output devices convey information.");
+Q("Input & Output Devices","Which is an OUTPUT device?","Printer",["Microphone","Web cam","Bar code reader"],"Printers, monitors and speakers are the three commonly used output devices.");
+Q("Input & Output Devices","A modem is classified in the lecture as a:","communications device",["storage device","output device","input device"],"The diagram labels the modem a communications device.");
+Q("Input & Output Devices","Which pair are both STORAGE devices?","USB flash drive and external hard disk",["Webcam and monitor, which both capture and show images","Scanner and speakers, which both pass data to a computer","Mouse and microphone, which both enter data into a computer"],"Flash drives, hard disks, memory cards and optical discs are storage devices.");
+/* Core components */
+Q("Core Components","Which component is called the 'brain' of the computer?","CPU",["RAM","PSU","Motherboard"],"The CPU executes all instructions, running at billions of cycles per second (GHz).");
+Q("Core Components","The central circuit board to which every other component connects is the:","motherboard",["CPU","GPU","power supply unit"],"The motherboard is the backbone of the computer.");
+Q("Core Components","The Power Supply Unit (PSU) converts:","AC electricity from the wall into the DC voltages components need",["DC electricity from a battery into AC electricity for the wall","sound signals from a microphone into electrical signals","binary data in the CPU into printed documents on paper"],"PSU converts AC to DC.");
+Q("Core Components","Which component handles rendering of images, video and 3D graphics?","GPU",["RAM","PSU","HDD"],"The Graphics Processing Unit is essential for gaming, video editing and AI.");
+Q("Core Components","How do SSDs differ from HDDs?","SSDs use flash chips and are much faster; HDDs use spinning magnetic disks",["SSDs use spinning magnetic disks and are slower than HDDs","SSDs lose all their stored data whenever power is switched off","HDDs use flash chips and are therefore much faster than SSDs"],"HDD: spinning magnetic platters; SSD: flash memory.");
+Q("Core Components","A computer has 16 GB of RAM. How many MB is this?","16,384",["16,000","8,192","1,600"],"16 × 1,024 = 16,384 MB.");
+/* Classification */
+Q("Computer Classification","Computers classified by technology (how data are processed) are:","digital, analog and hybrid",["supercomputers, mainframes and minicomputers","general-purpose and special-purpose","desktops, laptops and tablets"],"By technology: digital, analog, hybrid.");
+Q("Computer Classification","Digital computers process data as:","binary (0s and 1s)",["continuous signals","sound waves","chemical reactions"],"All modern computers are digital.");
+Q("Computer Classification","A mechanical weighing scale with a dial needle that moves continuously is an example of a(n):","analog computer",["digital computer","hybrid computer","mainframe computer"],"Analog computers process continuous physical data such as temperature or speed.");
+Q("Computer Classification","A hospital ICU monitor measures patient signals continuously and displays computed results. It is a:","hybrid computer",["analog computer","supercomputer","minicomputer"],"Hybrid computers combine analog measurement with digital processing.");
+Q("Computer Classification","Which computer is used for complex calculations such as national weather and climate modelling?","Supercomputer",["Microcomputer","Minicomputer","Mainframe"],"Supercomputers are the most powerful systems.");
+Q("Computer Classification","A bank processing thousands of transactions per second with many users at once is most likely using a:","mainframe computer",["microcomputer","analog computer","supercomputer"],"Mainframes handle massive data and many simultaneous users.");
+Q("Computer Classification","An ATM that is used only for banking transactions is a:","special-purpose computer",["general-purpose computer","analog computer","supercomputer"],"Special-purpose computers perform a single specific task.");
+Q("Computer Classification","Which statement about classification and type is correct?","One computer can belong to several types depending on the classification used",["A computer can belong to only one type, whatever the classification","A type is the method used to group computers into categories","Classification and type mean exactly the same thing in practice"],"Classification is the method; a type is a category resulting from it. A laptop is digital, a microcomputer and general-purpose.");
+
+
+// ─── ENGINE ──────────────────────────────────────────────────────────────────
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const TOPICS = [...new Set(RAW.map(q => q.s))];
+const AVATARS = ['#2ecc7e','#1abc9c','#3498db','#9b59b6','#e67e22','#e74c3c','#f39c12','#16a085','#8e44ad','#2980b9'];
+
+let activeTopics = new Set(TOPICS);
+let quiz = [], cur = 0, score = 0, answered = false;
+let currentUser = {name:'', reg:''};
+let leaderboard = JSON.parse(localStorage.getItem('cap31101_lb') || '[]');
+let comments = JSON.parse(localStorage.getItem('cap31101_cmt') || '{}');
+
+function saveComments(){ localStorage.setItem('cap31101_cmt', JSON.stringify(comments)); }
+function saveLB(){ localStorage.setItem('cap31101_lb', JSON.stringify(leaderboard)); }
+
+// Randomize answer positions, ensure correct answer never appears in same slot twice in a row
+function buildQ(raw, prevAnsPos) {
+  const pool = [raw.correct, ...raw.wrong];
+  let opts, correctIdx, attempts = 0;
+  do {
+    opts = shuffle(pool);
+    correctIdx = opts.indexOf(raw.correct);
+    attempts++;
+  } while (correctIdx === prevAnsPos && attempts < 15);
+  return { s: raw.s, q: raw.q, opts, ans: correctIdx, exp: raw.exp };
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if(id==='leaderboard'){ renderLB(); document.querySelectorAll('.nav-btn')[1].classList.add('active'); }
+  else document.querySelectorAll('.nav-btn')[0].classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function buildTopicGrid(){
+  const g = document.getElementById('topic-grid');
+  g.innerHTML = '';
+  TOPICS.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'topic-toggle on';
+    b.textContent = t;
+    b.onclick = function(){
+      if(activeTopics.has(t)){
+        if(activeTopics.size === 1) return;
+        activeTopics.delete(t); b.className='topic-toggle';
+      } else {
+        activeTopics.add(t); b.className='topic-toggle on';
+      }
+    };
+    g.appendChild(b);
+  });
+}
+
+function updateStatPlayers(){
+  document.getElementById('stat-players').textContent = leaderboard.length;
+}
+
+function startQuiz(){
+  const name = document.getElementById('inp-name').value.trim();
+  const reg = document.getElementById('inp-reg').value.trim();
+  if(!name){ alert('Please enter your name.'); return; }
+  currentUser = { name, reg };
+  const filtered = shuffle(RAW.filter(q => activeTopics.has(q.s)));
+  if(!filtered.length){ alert('Select at least one topic.'); return; }
+  quiz = []; let prev = -1;
+  filtered.forEach(r => { const q = buildQ(r, prev); prev = q.ans; quiz.push(q); });
+  cur = 0; score = 0; answered = false;
+  showScreen('quiz'); renderQ();
+}
+
+function renderQ(){
+  if(cur >= quiz.length){ endQuiz(); return; }
+  const q = quiz[cur];
+  const pct = (cur / quiz.length) * 100;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = `Question ${cur+1} of ${quiz.length}`;
+  document.getElementById('prog-score').textContent = `${score} pts`;
+  document.getElementById('q-section').textContent = q.s;
+  document.getElementById('q-text').textContent = q.q;
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  ['A','B','C','D'].forEach((l,i) => {
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.innerHTML = `<span class="opt-letter">${l}</span><span>${q.opts[i]}</span>`;
+    b.onclick = function(){ if(!answered) select(i, b); };
+    opts.appendChild(b);
+  });
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('discussion-section').style.display = 'none';
+  answered = false;
+  window.scrollTo(0,0);
+}
+
+function select(i, btn){
+  answered = true;
+  const q = quiz[cur];
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback');
+  if(i === q.ans){
+    btn.classList.add('correct'); score++;
+    fb.className = 'feedback-box correct';
+    fb.innerHTML = `<strong>✓ Correct!</strong>${q.exp}`;
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt-btn')[q.ans].classList.add('correct');
+    fb.className = 'feedback-box wrong';
+    fb.innerHTML = `<strong>✗ Not quite.</strong>${q.exp}`;
+  }
+  fb.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'inline-flex';
+  document.getElementById('prog-score').textContent = `${score} pts`;
+  showDiscussion(cur);
+}
+
+function nextQ(){ cur++; renderQ(); }
+
+function showDiscussion(idx){
+  const key = `q_${quiz[idx].q.slice(0,24).replace(/\W+/g,'_')}`;
+  document.getElementById('discussion-section').style.display = 'block';
+  renderComments(key);
+  document.getElementById('comment-input').dataset.key = key;
+}
+
+function renderComments(key){
+  const list = document.getElementById('comments-list');
+  const c = comments[key] || [];
+  if(!c.length){ list.innerHTML = '<div class="no-comments">No discussion yet — be the first.</div>'; return; }
+  list.innerHTML = c.map(cm => `
+    <div class="comment">
+      <div class="comment-author">${escHtml(cm.name)}${cm.reg?' <span style="color:var(--muted);font-weight:400">· '+escHtml(cm.reg)+'</span>':''}</div>
+      <div class="comment-text">${escHtml(cm.text)}</div>
+      <div class="comment-time">${cm.time}</div>
+    </div>`).join('');
+  list.scrollTop = list.scrollHeight;
+}
+
+function postComment(){
+  const inp = document.getElementById('comment-input');
+  const key = inp.dataset.key, text = inp.value.trim();
+  if(!text) return;
+  if(!comments[key]) comments[key] = [];
+  const now = new Date();
+  comments[key].push({ name: currentUser.name, reg: currentUser.reg, text,
+    time: now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · '+now.toLocaleDateString() });
+  saveComments(); inp.value = ''; renderComments(key);
+}
+
+function endQuiz(){
+  const total = quiz.length, pct = Math.round(score/total*100);
+  document.getElementById('result-ring').style.setProperty('--pct', pct+'%');
+  document.getElementById('result-pct').textContent = pct+'%';
+  document.getElementById('bd-correct').textContent = score;
+  document.getElementById('bd-wrong').textContent = total-score;
+  document.getElementById('bd-total').textContent = total;
+  let title, sub;
+  if(pct>=90){ title='Systems Expert! 💻'; sub='Exceptional command of ICT, data, storage units and computer classification. Exam-ready.'; }
+  else if(pct>=75){ title='Well done! 🌱'; sub='Strong performance. Recheck the storage-unit conversions and the classification types to reach 90%.'; }
+  else if(pct>=60){ title='Good foundation. 📚'; sub='You understand the basics. Focus on data vs information, the five-stage cycle and the three classification methods, then retry.'; }
+  else if(pct>=40){ title='Keep studying. 🔍'; sub='Go back to the slides topic by topic. Start with ICT and data vs information, then work through components and classification.'; }
+  else { title='Back to the notes. 📖'; sub='Read each slide section carefully. Learn the definitions first, then attempt the quiz again.'; }
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  const entry = { name: currentUser.name, reg: currentUser.reg, score, total, pct,
+    time: new Date().toLocaleString(), color: AVATARS[Math.abs(hashStr(currentUser.name))%AVATARS.length] };
+  leaderboard.push(entry);
+  leaderboard.sort((a,b)=>b.pct-a.pct||b.score-a.score);
+  saveLB(); updateStatPlayers(); showScreen('result');
+}
+
+function restartQuiz(){
+  const filtered = shuffle(RAW.filter(q => activeTopics.has(q.s)));
+  quiz = []; let prev = -1;
+  filtered.forEach(r => { const q = buildQ(r, prev); prev = q.ans; quiz.push(q); });
+  cur=0; score=0; answered=false; showScreen('quiz'); renderQ();
+}
+
+function renderLB(){
+  const rows = document.getElementById('lb-rows');
+  document.getElementById('lb-count').textContent = `${leaderboard.length} attempt${leaderboard.length!==1?'s':''}`;
+  if(!leaderboard.length){ rows.innerHTML='<div class="lb-empty">No attempts yet. Be the first!</div>'; return; }
+  const rc=['gold','silver','bronze'], re=['1st','2nd','3rd'];
+  rows.innerHTML = leaderboard.slice(0,20).map((e,i)=>{
+    const initials=e.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const isYou=currentUser.name&&e.name===currentUser.name;
+    return `<div class="lb-row">
+      <div class="lb-rank ${rc[i]||''}">${i<3?re[i]:i+1}</div>
+      <div class="lb-avatar" style="background:${e.color}22;color:${e.color}">${initials}</div>
+      <div class="lb-info">
+        <div class="lb-name">${escHtml(e.name)} ${isYou?'<span class="badge badge-you">you</span>':''}</div>
+        <div class="lb-meta">${e.reg?escHtml(e.reg)+' · ':''}${e.time}</div>
+      </div>
+      <div class="lb-score-wrap">
+        <div class="lb-score">${e.score}/${e.total}</div>
+        <div class="lb-pct">${e.pct}%</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function hashStr(s){ let h=0; for(let c of s){h=((h<<5)-h)+c.charCodeAt(0);h|=0;} return h; }
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+buildTopicGrid();
+updateStatPlayers();
+</script>
+</body>
+</html>
